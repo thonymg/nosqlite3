@@ -1,0 +1,39 @@
+{
+  "name": "jdbc-nosqlite",
+  "version": "1.0.0",
+  "description": "A lightweight embedded document database, ideal for small web applications.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "sqlite",
+    "nosql",
+    "nosqlite",
+    "document",
+    "mongo",
+    "mongodb"
+  ],
+  "author": "Johan Wirén",
+  "license": "MIT",
+  "dependencies": {
+    "java": "^0.12.1",
+    "nanoid": "^3.1.22",
+    "node-java-maven": "^0.1.2"
+  },
+  "java": {
+    "repositories": [
+      {
+        "id": "jitpack.io",
+        "url": "https://jitpack.io"
+      }
+    ],
+    "dependencies": [
+      {
+        "groupId": "com.github.Aarkan1",
+        "artifactId": "nosqlite",
+        "version": "ce7405d"
+      }
+    ]
+  }
+}
