@@ -49,7 +49,7 @@ function initCollection(config = {}) {
       const collectionNames = java.callStaticMethodSync('nosqlite.Database', 'collectionNames')
 
       for(let coll of collectionNames.toArray()) {
-        collections[coll] = new Collection(collection(coll), defaultConfig.parse)
+        collections[coll] = new Collection(collection(coll), defaultConfig.parse, coll)
       }
 
       java.options.push('-Xrs')

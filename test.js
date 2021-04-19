@@ -74,6 +74,10 @@ async function test() {
   start = Date.now()
   JSON.stringify(user)
   console.log(`JSON.stringify() in ${Date.now() - start}ms`);
+
+  collection('user').watch(watchData => {
+    console.log('watchData:', watchData);
+  })
   
   let users = []
 
@@ -121,15 +125,15 @@ async function test() {
   // console.log(`save(User) * 1000 in ${Date.now() - start}ms`);
 
   // start = Date.now()
-  // console.log(await collection('test').save({
-  //       _id: "_3LV-hLWA1JskY7Pan1mT",
-  //       name: 'Elsa',
-  //       age: 15,
-  //       cat: {
-  //         name: 'Mysan'
-  //       }
-  //     }
-  // ))
+  console.log(await collection('user').save({
+        // _id: "_3LV-hLWA1JskY7Pan1mT",
+        name: 'Elsa',
+        age: 15,
+        cat: {
+          name: 'Mysan'
+        }
+      }
+  ))
   // console.log(`save() in ${Date.now() - start}ms`);
 
   // start = Date.now()
@@ -139,7 +143,7 @@ async function test() {
   start = Date.now()
   let ageLT100 = await collection('user').findOne("age<100");
   // ageLT100 = JSON.parse(ageLT100)
-  console.log(ageLT100);
+  // console.log(ageLT100);
   console.log(`find("age<100") in ${Date.now() - start}ms`);
   
   collection('test').delete()
