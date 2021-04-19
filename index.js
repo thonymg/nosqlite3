@@ -1,8 +1,11 @@
 const java = require('java')
-const maven = require('node-java-maven')
-const Collection = require('./Collection')
+const sleep = require('system-sleep')
+const Collection = require('./libs/Collection')
+const Filter = require('./libs/Filter')
+
+// local variables
 let hasInitialized = false
-let startedInit = false
+let hasStarted = false
 const collections = {}
 
 // init support for async/await syntax
@@ -19,12 +22,12 @@ let defaultConfig = {
 }
 
 function initCollection(config = {}) {
-  return new Promise((resolve, reject) => {
-    if(hasInitialized) return resolve()
-    if(startedInit) return
-    
+  return new Promise(resolve => {
+    if(hasStarted || hasInitialized) return resolve()
+    hasStarted = true
+
+    let maven = require('node-java-maven')
     maven(function(err, mavenResults) {
-      startedInit = true
       if (err) {
         return console.error('could not resolve maven dependencies', err)
       }
@@ -35,19 +38,28 @@ function initCollection(config = {}) {
       });
 
       Object.assign(defaultConfig, config)
-      
-      let Database = java.import('nosqlite.Database')
+
+      const Database = java.import('nosqlite.Database')
       java.setStaticFieldValue('nosqlite.Database', "runAsync", false)
       java.setStaticFieldValue('nosqlite.Database', "dbPath", defaultConfig.dbPath)
 
-      let collection = Database.collection
+      const collection = Database.collection
       collection()
 
-      let collectionNames = java.callStaticMethodSync('nosqlite.Database', 'collectionNames')
+      const collectionNames = java.callStaticMethodSync('nosqlite.Database', 'collectionNames')
 
       for(let coll of collectionNames.toArray()) {
         collections[coll] = new Collection(collection(coll), defaultConfig.parse)
       }
+
+      java.options.push('-Xrs')
+      const ShutdownHookHelper = java.import('nosqlite.utilities.ShutdownHookHelper');
+
+      ShutdownHookHelper.setShutdownHook(java.newProxy('java.lang.Runnable', {
+        run: function () {
+          console.log("\nJVM shutting down\n");
+        }
+      }));
 
       hasInitialized = true
       resolve()
@@ -56,9 +68,13 @@ function initCollection(config = {}) {
 }
 
 module.exports = {
+  Filter,
   initCollection, 
   collection(coll = '_default_coll') {
     if(!hasInitialized) initCollection()
+
+    // TODO: doesn't load classes
+    while(!hasInitialized) sleep(100)
 
     if(hasInitialized && !collections[coll]) {
       let Database = java.import('nosqlite.Database')

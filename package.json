@@ -1,16 +1,20 @@
 {
-  "name": "jdbc-nosqlite",
-  "version": "1.0.0",
+  "name": "nosqlite3",
+  "version": "0.1.0",
   "description": "A lightweight embedded document database, ideal for small web applications.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=12.0.0"
   },
   "keywords": [
     "sqlite",
     "nosql",
     "nosqlite",
     "document",
+    "database",
     "mongo",
     "mongodb"
   ],
@@ -19,7 +23,8 @@
   "dependencies": {
     "java": "^0.12.1",
     "nanoid": "^3.1.22",
-    "node-java-maven": "^0.1.2"
+    "node-java-maven": "^0.1.2",
+    "system-sleep": "^1.3.7"
   },
   "java": {
     "repositories": [
@@ -32,8 +37,13 @@
       {
         "groupId": "com.github.Aarkan1",
         "artifactId": "nosqlite",
-        "version": "ce7405d"
+        "version": "2bea841"
       }
     ]
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aarkan1/nosqlite3.git"
+  },
+  "homepage": "https://github.com/Aarkan1/nosqlite3"
 }

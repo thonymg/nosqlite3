@@ -1,10 +1,14 @@
-const { initCollection, collection } = require('./index.js')
-const { objectToJavaHashMap } = require('./utils.js')
+const { initCollection, collection, Filter } = require('./index.js')
+const { objectToJavaHashMap } = require('./libs/utils.js')
 const java = require('java')
 
 // collection()
 
-test()
+// initCollection()
+// setTimeout(() => {
+  
+  test()
+// }, 1000);
 // setTimeout(() => {
   
 //   test()
@@ -152,6 +156,22 @@ async function test() {
   // start = Date.now()
   // console.log(JSON.parse(elsa));
   // console.log(`parse in ${Date.now() - start}ms`);
+
+
+  const { and, or, eq, lt } = Filter
+
+  console.log(and(
+    or(
+      eq("name", "Loke"),
+      eq("cat.name", "Tyson")
+    ),
+    lt("age", 10)
+  ));
+
+  console.log(Filter.in("name", "Loke", "Elsa", "Theo"));
+  let names = ["Loke", "Elsa", "Theo"]
+  console.log(Filter.in("name", names));
+
 }
 
 
