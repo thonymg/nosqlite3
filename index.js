@@ -1,5 +1,11 @@
+/**
+ * @author Johan Wirén
+ */
+
 const java = require('java')
-const sleep = require('system-sleep')
+const { isObject } = require('./libs/utils')
+java.classpath.push('./nosqlite.jar')
+
 const Collection = require('./libs/Collection')
 const Filter = require('./libs/Filter')
 
@@ -7,6 +13,7 @@ const Filter = require('./libs/Filter')
 let hasInitialized = false
 let hasStarted = false
 const collections = {}
+const collectionNames = []
 
 // init support for async/await syntax
 java.asyncOptions = {
@@ -22,64 +29,53 @@ let defaultConfig = {
 }
 
 function initCollection(config = {}) {
-  return new Promise(resolve => {
-    if(hasStarted || hasInitialized) return resolve()
-    hasStarted = true
+  if(hasStarted || hasInitialized) return
+  hasStarted = true
 
-    let maven = require('node-java-maven')
-    maven(function(err, mavenResults) {
-      if (err) {
-        return console.error('could not resolve maven dependencies', err)
-      }
+  Object.assign(defaultConfig, config)
 
-      mavenResults.classpath.forEach(function(c) {
-        // console.log('adding ' + c + ' to classpath') // debug
-        java.classpath.push(c)
-      });
+  const Database = java.import('nosqlite.Database')
+  java.setStaticFieldValue('nosqlite.Database', "runAsync", false)
+  java.setStaticFieldValue('nosqlite.Database', "dbPath", defaultConfig.dbPath)
 
-      Object.assign(defaultConfig, config)
+  const collection = Database.collection
+  collection()
 
-      const Database = java.import('nosqlite.Database')
-      java.setStaticFieldValue('nosqlite.Database', "runAsync", false)
-      java.setStaticFieldValue('nosqlite.Database', "dbPath", defaultConfig.dbPath)
+  const collNames = java.callStaticMethodSync('nosqlite.Database', 'collectionNames')
 
-      const collection = Database.collection
-      collection()
+  for(let coll of collNames.toArray()) {
+    collectionNames.push(coll)
+    collections[coll] = new Collection(collection(coll), defaultConfig.parse, coll)
+  }
 
-      const collectionNames = java.callStaticMethodSync('nosqlite.Database', 'collectionNames')
+  // java.options.push('-Xrs')
+  const ShutdownHookHelper = java.import('nosqlite.utilities.ShutdownHookHelper');
 
-      for(let coll of collectionNames.toArray()) {
-        collections[coll] = new Collection(collection(coll), defaultConfig.parse, coll)
-      }
+  ShutdownHookHelper.setShutdownHook(java.newProxy('java.lang.Runnable', {
+    run: function () {
+      console.log("\nJVM shutting down\n");
+    }
+  }));
 
-      java.options.push('-Xrs')
-      const ShutdownHookHelper = java.import('nosqlite.utilities.ShutdownHookHelper');
-
-      ShutdownHookHelper.setShutdownHook(java.newProxy('java.lang.Runnable', {
-        run: function () {
-          console.log("\nJVM shutting down\n");
-        }
-      }));
-
-      hasInitialized = true
-      resolve()
-    })
-  })
+  hasInitialized = true
 }
 
 module.exports = {
   Filter,
-  initCollection, 
-  collection(coll = '_default_coll') {
+  collectionNames() {
     if(!hasInitialized) initCollection()
-
-    // TODO: doesn't load classes
-    while(!hasInitialized) sleep(100)
+    return collectionNames
+  },
+  collection(coll = 'default_coll') {
+    if(!hasInitialized) {
+      if(isObject(coll)) initCollection(coll)
+      else initCollection()
+    }
 
     if(hasInitialized && !collections[coll]) {
       let Database = java.import('nosqlite.Database')
       let collection = Database.collection
-      collections[coll] = new Collection(collection(coll))
+      collections[coll] = new Collection(collection(coll), true, coll)
     }
 
     return collections[coll]

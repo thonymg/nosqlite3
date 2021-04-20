@@ -1,5 +1,17 @@
+/**
+ * @author Johan Wirén
+ */
+
 const java = require('java')
 const { nanoid } = require('nanoid')
+const { isObject } = require('./utils')
+
+let defaultFindOptions = {
+  filter: null,
+  sort: null,
+  limit: 0,
+  offset: 0
+}
 
 module.exports = class Collection {
   constructor(coll, parse = true, collName) {
@@ -10,14 +22,19 @@ module.exports = class Collection {
     this.eventWatchers = {}
   }
 
-  async find(...args) {
+  async find(filter = null, sort = null, limit = 0, offset = 0) {
+    let args = [filter, sort, limit, offset]
+    if(isObject(filter)) {
+      Object.assign(defaultFindOptions, filter)
+      args = Object.values(defaultFindOptions)
+    }
     if(this.parse) return JSON.parse(await this.coll.findAsJsonAsync(...args))
     return this.coll.findAsJsonAsync(...args)
   }
 
-  async findOne(...args) { 
-    if(this.parse) return JSON.parse(await this.coll.findOneAsJsonAsync(...args))
-    return this.coll.findOneAsJsonAsync(...args)
+  async findOne(filter) { 
+    if(this.parse) return JSON.parse(await this.coll.findOneAsJsonAsync(filter))
+    return this.coll.findOneAsJsonAsync(filter)
   }
 
   async findById(id) { 
@@ -42,7 +59,9 @@ module.exports = class Collection {
       return this.coll.saveManyAsync(list.toArray())
     }
 
-    if(doc._id) event = 'update'
+    let exists = await this.findById(doc._id || '')
+    if(!!exists) event = 'update'
+
     doc._id = doc._id || nanoid()
     this._updateWatchers(event, doc)
 
@@ -50,14 +69,23 @@ module.exports = class Collection {
     return this.coll.putAsync(doc._id, JSON.stringify(doc))
   }
 
-  async delete(...args) { 
-    if(args[0] && args[0]._id) {
-      return this.deleteById(args[0]._id)
+  async delete(filter) {
+    if(filter && filter._id) {
+      return this.deleteById(filter._id)
     }
-    let doc = await this.coll.deleteAsync(...args)
+
+    let doc = filter ? await this.coll.deleteAsync(filter) : await this.coll.deleteAsync()
     this._updateWatchers('delete', doc)
 
-    if(args[0] && this.parse) return JSON.parse(doc)
+    if(!!doc && filter && this.parse) return JSON.parse(doc)
+    else return doc
+  }
+
+  async deleteOne(filter) {
+    let doc = await this.coll.deleteOneAsync(filter)
+    this._updateWatchers('delete', doc)
+
+    if(!!doc && this.parse) return JSON.parse(doc)
     else return doc
   }
 
@@ -65,33 +93,51 @@ module.exports = class Collection {
     let doc = await this.coll.deleteByIdAsync(id)
     this._updateWatchers('delete', doc)
 
-    if(this.parse) return JSON.parse(doc)
+    if(!!doc && this.parse) return JSON.parse(doc)
     else return doc
   }
 
+  /**
+   * 
+   * @param  {document, field, value} args 
+   * updates the document with same _id
+   * 
+   * @param  {filter, field, value} args 
+   * updates documents matching filter
+   * 
+   * @param  {field, value} args 
+   * updates all document with new value
+   * 
+   * @returns updated documents
+   */
   async updateField(...args) { 
+    if(args[0] && args[0]._id) {
+      return this.updateFieldById(...args)
+    }
     let doc = await this.coll.updateFieldAsync(...args)
+    if(doc === 'same value') return
+
+    this._updateWatchers('update', doc)
+
+    if(this.parse && doc !== 'updated all') return JSON.parse(doc)
+    else return doc
+  }
+
+  async updateFieldById(id, field, value) { 
+    let doc = await this.coll.updateFieldByIdAsync(id, field, value)
+    if(doc === 'same value') return
+
     this._updateWatchers('update', doc)
 
     if(this.parse) return JSON.parse(doc)
     else return doc
   }
 
-  async updateFieldById(...args) { 
-    let doc = await this.coll.updateFieldByIdAsync(...args)
-    this._updateWatchers('update', doc)
-
-    if(this.parse) return JSON.parse(doc)
-    else return doc
-  }
-
-  async changeFieldName(...args) { 
-    if(this.parse) return JSON.parse(await this.coll.changeFieldName(...args))
-    return this.coll.changeFieldName(...args)
+  async changeFieldName(newField, oldField) { 
+    return this.coll.changeFieldName(newField, oldField)
   }
 
   async removeField(field) { 
-    if(this.parse) return JSON.parse(await this.coll.removeFieldAsync(field))
     return this.coll.removeFieldAsync(field)
   }
 
@@ -100,17 +146,17 @@ module.exports = class Collection {
     if(event.constructor === Function) {
       this.watchers.push(event)
     } else {
-      if(!this.eventWatchers[event]) this.eventWatchers['event'] = []
+      if(!this.eventWatchers[event]) this.eventWatchers[event] = []
       this.eventWatchers[event].push(handler)
     }
   }
 
-  async count() { 
-    return await this.coll.countAsync()
+  count() { 
+    return this.coll.count()
   }
 
   _updateWatchers(event, data) {
-    if(data === 'deleted') return // don't update when deleting a whole collection
+    if([null, 'deleted', 'updated all', '[null]', '[]'].includes(data)) return // don't update when deleting a whole collection
     setTimeout(() => {
       const watchData = {
         event,

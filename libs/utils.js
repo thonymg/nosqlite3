@@ -1,3 +1,7 @@
+/**
+ * @author Johan Wirén
+ */
+
 const java = require('java')
 
 // recursive converter
@@ -58,6 +62,7 @@ function workerize (fn, workerOptions = {}) {
 }
 
 module.exports = {
+  isObject,
   objectToJavaHashMap,
   workerize
 }

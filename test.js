@@ -1,4 +1,8 @@
-const { initCollection, collection, Filter } = require('./index.js')
+/**
+ * @author Johan Wirén
+ */
+
+const { collection, Filter, collectionNames } = require('./index.js')
 const { objectToJavaHashMap } = require('./libs/utils.js')
 const java = require('java')
 
@@ -14,13 +18,32 @@ const java = require('java')
 //   test()
 // }, 1000);
 async function test() {
-  await initCollection()
-  // await initCollection({ 
+  // await initCollection()
+  // collection({ 
   //   // dbPath: 'test/embedd.db',
-  //   parse: false 
+  //   // parse: false 
   // })
 
+  console.log(collectionNames());
+
+  collection('user').watch(watchData => {
+    console.log('watchData:', watchData);
+  })
+
+  collection('user').watch('insert', watchData => {
+    console.log('[insert] watchData:', watchData);
+  })
+
+  collection('user').watch('update', watchData => {
+    console.log('[update] watchData:', watchData);
+  })
+
+  collection('user').watch('delete', watchData => {
+    console.log('[delete] watchData:', watchData);
+  })
+
   let user = {
+    _id: '3',
     name: 'Johan',
     age: 32,
     friend: {
@@ -34,51 +57,29 @@ async function test() {
         {
             name: 'Cocos'
         },
-    ],
-    friends: [
-      {
-        name: 'Elsa',
-        age: 22
-      },
-      {
-        name: 'Elsa',
-        age: 22
-      },
-      {
-        name: 'Elsa',
-        age: 22
-      },
-      {
-        name: 'Elsa',
-        age: 22
-      },
-      {
-        name: 'Elsa',
-        age: 22
-      },
-      {
-        name: 'Elsa',
-        age: 22
-      },
     ]
   }
 
   let start = Date.now()
+  JSON.stringify(user)
+  console.log(`JSON.stringify() in ${Date.now() - start}ms`);
+  
+  start = Date.now()
+  collection('friends').save(user)
+  console.log(`save() in ${Date.now() - start}ms`);
+  
+  start = Date.now()
+  collection('user').deleteById('444')
+  console.log(`save() in ${Date.now() - start}ms`);
+  
+  start = Date.now()
   let map = objectToJavaHashMap(user)
   console.log(`objectToJavaHashMap() in ${Date.now() - start}ms`);
   
   // console.log(map.get('name'));
   // console.log(map.get('pets').get(1).get('name'));
   // console.log(map.get('friend').get('name'));
-  
-  start = Date.now()
-  JSON.stringify(user)
-  console.log(`JSON.stringify() in ${Date.now() - start}ms`);
-
-  collection('user').watch(watchData => {
-    console.log('watchData:', watchData);
-  })
-  
+    
   let users = []
 
   start = Date.now()
@@ -146,7 +147,26 @@ async function test() {
   // console.log(ageLT100);
   console.log(`find("age<100") in ${Date.now() - start}ms`);
   
-  collection('test').delete()
+  await collection('test').delete()
+  console.log(await collection('user').find('name==lol'));
+  
+  // await collection('user').updateFieldById('111cc', 'name', 'Jens')
+  // await collection('user').updateField('age', 10)
+  console.log((await collection('user').deleteOne("name=Elsa")).length);
+  
+  console.log(await collection('user').find({
+    // filter: 'age>11',
+    limit: 1,
+    // offset: 0,
+    sort: 'age>'
+  }));
+  
+  // await collection('friends').changeFieldName('cats', 'pets')
+  // await collection('friends').removeField('pets')
+  console.log('find friends:', await collection('friends').find());
+  console.log('count users:', collection('user').count());
+
+
   // start = Date.now()
   // let elsa = await collection('user').findById("id-2")
   // console.log(elsa);
@@ -164,17 +184,19 @@ async function test() {
 
   const { and, or, eq, lt } = Filter
 
-  console.log(and(
-    or(
-      eq("name", "Loke"),
-      eq("cat.name", "Tyson")
-    ),
-    lt("age", 10)
-  ));
+  // console.log(await collection('user').find(and(
+  //   or(
+  //     eq("name", "Loke"),
+  //     eq("cat.name", "Mysan")
+  //   ),
+  //   lt("age", 20)
+  // )));
 
-  console.log(Filter.in("name", "Loke", "Elsa", "Theo"));
-  let names = ["Loke", "Elsa", "Theo"]
-  console.log(Filter.in("name", names));
+  // console.log(Filter.in("name", "Loke", "Elsa", "Theo"));
+  // let names = ["Loke", "Elsa", "Theo"]
+  // console.log(Filter.in("name", names));
+
+
 
 }
 

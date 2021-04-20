@@ -1,3 +1,7 @@
+/**
+ * @author Johan Wirén
+ */
+
 module.exports = class Filter {
   static eq(field, value) {
     return field + "=" + value;
