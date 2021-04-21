@@ -1,14 +1,10 @@
 {
   "name": "nosqlite3",
-  "author": "Johan Wirén",
-  "version": "0.1.0",
+  "author": "Johan Wirén <johanwiren1@gmail.com>",
+  "version": "0.1.1",
   "description": "A lightweight embedded document database, ideal for small web applications.",
   "main": "./index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "engines": {
-    "node": ">=10.0.0"
   },
   "keywords": [
     "sqlite",

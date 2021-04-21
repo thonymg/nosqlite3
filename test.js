@@ -184,13 +184,25 @@ async function test() {
 
   const { and, or, eq, lt } = Filter
 
-  // console.log(await collection('user').find(and(
+  // console.log('filter1', await collection('user').find(
+  //   and(
+  //     or(
+  //       eq("name", "Loke"),
+  //       eq("cat.name", "Mysan")
+  //     ),
+  //     lt("age", 20)
+  //   ), null, 2
+  // ));
+
+  // console.log('filter2', await collection('user').find('( name=Loke || cat.name=Mysan ) && age<20', null, 2))
+
+  // console.log(and(
   //   or(
   //     eq("name", "Loke"),
   //     eq("cat.name", "Mysan")
   //   ),
   //   lt("age", 20)
-  // )));
+  // ));
 
   // console.log(Filter.in("name", "Loke", "Elsa", "Theo"));
   // let names = ["Loke", "Elsa", "Theo"]
