@@ -12,7 +12,7 @@ const java = require('java')
 // setTimeout(() => {
   
   // test()
-  test2()
+  // test2()
 // }, 1000);
 // setTimeout(() => {
   

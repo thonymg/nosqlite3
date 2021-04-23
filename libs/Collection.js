@@ -88,8 +88,8 @@ module.exports = class Collection {
       
       this._updateWatchers(event, doc)
       
-      if(this.parse) return JSON.parse(await this.coll.saveManyAsync(list.toArray()))
-      return this.coll.saveManyAsync(list.toArray())
+      await this.coll.saveManyAsync(list.toArray())
+      return doc
     }
 
     let exists = await this.findById(doc._id || '')
