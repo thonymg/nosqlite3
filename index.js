@@ -4,7 +4,7 @@
 
 const java = require('java')
 const { isObject } = require('./libs/utils')
-java.classpath.push('./nosqlite.jar')
+java.classpath.push(__dirname + '/nosqlite.jar')
 
 const Collection = require('./libs/Collection')
 const Filter = require('./libs/Filter')

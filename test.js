@@ -11,7 +11,8 @@ const java = require('java')
 // initCollection()
 // setTimeout(() => {
   
-  test()
+  // test()
+  test2()
 // }, 1000);
 // setTimeout(() => {
   
@@ -147,7 +148,7 @@ async function test() {
   // console.log(ageLT100);
   console.log(`find("age<100") in ${Date.now() - start}ms`);
   
-  await collection('test').delete()
+  // await collection('test').delete()
   console.log(await collection('user').find('name==lol'));
   
   // await collection('user').updateFieldById('111cc', 'name', 'Jens')
@@ -184,13 +185,25 @@ async function test() {
 
   const { and, or, eq, lt } = Filter
 
-  // console.log(await collection('user').find(and(
+  // console.log('filter1', await collection('user').find(
+  //   and(
+  //     or(
+  //       eq("name", "Loke"),
+  //       eq("cat.name", "Mysan")
+  //     ),
+  //     lt("age", 20)
+  //   ), null, 2
+  // ));
+
+  // console.log('filter2', await collection('user').find('( name=Loke || cat.name=Mysan ) && age<20', null, 2))
+
+  // console.log(and(
   //   or(
   //     eq("name", "Loke"),
   //     eq("cat.name", "Mysan")
   //   ),
   //   lt("age", 20)
-  // )));
+  // ));
 
   // console.log(Filter.in("name", "Loke", "Elsa", "Theo"));
   // let names = ["Loke", "Elsa", "Theo"]
@@ -200,38 +213,48 @@ async function test() {
 
 }
 
+async function test2() {
+  console.log(await collection('test').put('abc', {
+    name: 'Loke',
+    age: 7,
+    cat: {
+      name: 'Tyson'
+    }
+  }));
 
+  console.log(await collection('test').put('abc', JSON.stringify({
+    name: 'Aarkan',
+    age: 17,
+    cat: {
+      name: 'Cocos'
+    }
+  })));
+  console.log(await collection('test').put('bcd', JSON.stringify({
+    name: 'Theo',
+    age: 4,
+    cat: {
+      name: 'Cocos'
+    }
+  })));
 
-  // let collection = await loadCollection.catch(console.error)
+  // console.log(await collection('test').putIfAbsent('cde', 345));
+  // console.log(await collection('test').putIfAbsent('cde', 'fail'));
+  // console.log(await collection('test').get('abc'));
+  // console.log(await collection('test').get('cde'));
+  // console.log(await collection('test').remove('bcd'));
+  // console.log(await collection('test').get('bcd'));
+  
+  console.log(await collection('test').put('a', "greeting"));
+  console.log(await collection('test').put('b', true));
+  console.log(await collection('test').put('c', ['hej', 'hopp']));
+  console.log(await collection('test').put('d', 5.55));
+  console.log(await collection('test').put('e', [{ ok: true }, { ok: 'false' }, 123, 'ok', true]));
+  console.log(await collection('test').find());
 
-
-  // console.log(await collection('test').putAsync('abc', {
-  //   name: 'Loke',
-  //   age: 7,
-  //   cat: {
-  //     name: 'Tyson'
-  //   }
-  // }));
-
-  // console.log(await collection('test').putAsync('abc', JSON.stringify({
-  //   name: 'Loke',
-  //   age: 7,
-  //   cat: {
-  //     name: 'Tyson'
-  //   }
-  // })));
-  // console.log(await collection('test').putAsync('bcd', JSON.stringify({
-  //   name: 'Theo',
-  //   age: 4,
-  //   cat: {
-  //     name: 'Cocos'
-  //   }
-  // })));
-  // console.log(await collection('test').putIfAbsentAsync('cde', 345));
-  // console.log(await collection('test').getAsync('abc'));
-  // console.log(await collection('test').findAsJsonAsync());
-  // console.log(await collection('test').findAsJsonAsync("name==Loke"));
-  // console.log(await collection('test').findAsJsonAsync("cat.name=~%o_"));
-  // console.log(await collection('test').findAsJsonAsync("age>5"));
-  // console.log(await collection('test').findAsJsonAsync("age>3"));
-  // console.log(await coll('test').findAsJsonAsync("cat.name==Cocos || cat.name==Tyson"));
+  console.log(await collection('test').get('e'));
+  // console.log(await collection('test').find("name==Loke"));
+  // console.log(await collection('test').find("cat.name=~%o_"));
+  // console.log(await collection('test').find("age>5"));
+  // console.log(await collection('test').find("age>3"));
+  // console.log(await collection('test').find("cat.name==Cocos || cat.name==Tyson"));
+}

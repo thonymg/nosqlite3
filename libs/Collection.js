@@ -22,8 +22,41 @@ module.exports = class Collection {
     this.eventWatchers = {}
   }
 
-  async find(filter = null, sort = null, limit = 0, offset = 0) {
-    let args = [filter, sort, limit, offset]
+  async get(key) {
+    return this.findById(key)
+  }
+
+  async put(key, value) {
+    let event = 'insert'
+    let exists = await this.findById(key)
+    if(!!exists) event = 'update'
+
+    this._updateWatchers(event, {[key]: value})
+    
+    // don't stringify JSON
+    if(typeof value != 'string') {
+      value = JSON.stringify(value)
+    }
+
+    return this.coll.putAsync(key, value)
+  }
+  
+  async putIfAbsent(key, value) {
+    let exists = await this.findById(key)
+    if(!!exists) return `'${key}' already exists`
+
+    return this.put(key, value)
+  }
+
+  async remove(key) {
+    let doc = await this.findById(key)
+    this._updateWatchers('delete', doc)
+
+    return this.coll.removeAsync(key)
+  }
+
+  async find(filter = null, sortBy = null, limit = 0, offset = 0) {
+    let args = [filter, sortBy, limit, offset]
     if(isObject(filter)) {
       Object.assign(defaultFindOptions, filter)
       args = Object.values(defaultFindOptions)
