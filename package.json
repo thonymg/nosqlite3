@@ -1,6 +1,6 @@
 {
   "name": "nosqlite3",
-  "author": "Johan Wirén",
+  "author": "Johan Wirén <johanwiren1@gmail.com>",
   "version": "0.1.0",
   "description": "A lightweight embedded document database, ideal for small web applications.",
   "main": "./index.js",
