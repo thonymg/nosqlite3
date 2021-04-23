@@ -299,7 +299,7 @@ These examples uses the deconstructed Filter syntax
 const { collection, Filter } = require('nosqlite3');
 
 // with deconstruction of Filter methods
-const { eq, ne, gt, gte, lt, lte, not, and, or } = Filter;
+const { eq, ne, gt, gte, lt, lte, not, and, or, text, regex } = Filter;
 
 // 'in' is a reserved keywords, and cannot be deconstructed
 Filter.in(); // filter from a list
@@ -383,10 +383,10 @@ collection("User").find("age<=30");
 **in()**
 ```js
 // matches all documents where 'age' field has value in [20, 30, 40]
-collection("User").find(in("age", 20, 30, 40));
+collection("User").find(Filter.in("age", 20, 30, 40));
 
 List ages = List.of(20, 30, 40);
-collection("User").find(in("age", ages));
+collection("User").find(Filter.in("age", ages));
 
 // with the statement syntax
 collection("User").find("age==[20, 30, 40]");
