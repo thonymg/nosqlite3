@@ -19,11 +19,11 @@ let john = {
   age: 32
 };
 
-// save john to the MyCustomUser-collection
-collection("MyCustomUser").save(john); 
+// save john to the users-collection
+await collection("users").save(john); 
 
 // get all users
-let users = collection("MyCustomUser").find();  
+let users = await collection("users").find();  
 ```
 
 ## Requirements
@@ -54,6 +54,7 @@ npm install nosqlite3
 Collections is used with the `collection()`-method to manipulate the database.
 **collection()** takes a collection-name as parameter. Each collection stores data separately. 
 If **collection()** is used without a name, it defaults to a 'default_coll' collection.
+All calls to the database are asynchronous, so you need to *await* the response.
 
 First call to **collection()** will initiate a database connection.
 The first time it will create a database-file in your project. Easy to deploy or share. 
@@ -62,29 +63,29 @@ The first time it will create a database-file in your project. Easy to deploy or
 ```js
 const { collection, Filter } = require('nosqlite3');
 
-let john = new MyCustomUser("John");
+let john = new users("John");
 
 // generates an UUID like: "lic4XCz2kxSOn4vr0D8BV"
-collection("MyCustomUser").save(john);    
+await collection("users").save(john);    
 
-let jane = collection("MyCustomUser").findById("lic4XCz2kxSOn4vr0D8BV");
+let jane = await collection("users").findById("lic4XCz2kxSOn4vr0D8BV");
 
 jane.setAge(30);
 
 // updates document with same UUID
-collection("MyCustomUser").save(jane); 
+await collection("users").save(jane); 
 
 // delete Jane
-collection("MyCustomUser").deleteById("lic4XCz2kxSOn4vr0D8BV"); 
+await collection("users").deleteById("lic4XCz2kxSOn4vr0D8BV"); 
 
 // get all users
-let users = collection("MyCustomUser").find(); 
+let users = await collection("users").find(); 
 
 // get all users named 'John'
-let usersNamedJohn = collection("MyCustomUser").find(Filter.eq("name", "John"));
+let usersNamedJohn = await collection("users").find(Filter.eq("name", "John"));
 
 // or with the statement syntax
-let usersNamedJohn = collection("MyCustomUser").find("name==John"); 
+let usersNamedJohn = await collection("users").find("name==John"); 
 ```
 
 ## Document
@@ -104,7 +105,7 @@ let user = {
 }
 
 // save without _id
-collection("MyCustomUser").save(user);
+await collection("users").save(user);
 
 // user now has the property '_id'
 user._id  // 'lic4XCz2kxSOn4vr0D8BV',
@@ -120,7 +121,7 @@ Watch a collection on changes:
 // model - is the document class that was triggered 
 // event - is the event triggered - 'insert', 'update' or 'delete'
 // data - is a list with effected documents
-collection("MyCustomUser").watch(watchData => {
+collection("users").watch(watchData => {
     let effectedUsers = watchData.data;
 
     switch(watchData.event) {
@@ -138,17 +139,17 @@ collection("MyCustomUser").watch(watchData => {
 
 Watch a collection on changes on a specific event:
 ```js
-collection("MyCustomUser").watch("insert", watchData => {
+collection("users").watch("insert", watchData => {
     let effectedUsers = watchData.data;
     // do logic with inserted documents
 });
 
-collection("MyCustomUser").watch("update", watchData => {
+collection("users").watch("update", watchData => {
     let effectedUsers = watchData.data;
     // do logic with updated documents
 });
 
-collection("MyCustomUser").watch("delete", watchData => {
+collection("users").watch("delete", watchData => {
     let effectedUsers = watchData.data;
     // do logic with deleted documents
 });
@@ -156,7 +157,7 @@ collection("MyCustomUser").watch("delete", watchData => {
 
 ## Collection methods
 
-To use the collection you need to add which document to query for in the collection parameter, ex `collection("User")` will only query for Users.
+To use the collection you need to add which document to query for in the collection parameter, ex `collection("users")` will only query for Users.
 Data is stored in the collection as JSON, and the `find()`-methods will by default parse this JSON.
 
 Setting a collection to `parse: false` is MUCH MUCH faster, because no parsing is required. This is good when only sending data from a collection directly over the network.
@@ -187,10 +188,10 @@ When using the collection as a key/value store you can save any data you want.
 
 Note: you can't filter with `find()` when storing raw data.
 ```js
-collection("randomData").put("snuggles", { name: "Snuggles" });
-collection("randomData").put("1+2", 3);
+await collection("randomData").put("snuggles", { name: "Snuggles" });
+await collection("randomData").put("1+2", 3);
 
-let snuggles = collection("randomData").get("snuggles");
+let snuggles = await collection("randomData").get("snuggles");
 ```
 
 | Operation | Method | Description |
@@ -262,10 +263,10 @@ Example
 // find(filter, sortBy, limit, offset)
 
 // sorts all documents by age in ascending order then take first 10 documents and return as a List
-let users = collection("User").find(null, "age=asc", 10, 0);
+let users = await collection("users").find(null, "age=asc", 10, 0);
 
 // or with FindOptions
-let users = collection("User").find({
+let users = await collection("users").find({
   sortBy: "age=asc",
   limit: 10
 });
@@ -273,20 +274,20 @@ let users = collection("User").find({
 
 ```js
 // sorts the documents by age in descending order
-let users = collection("User").find(null, "age=desc", 0, 0);
+let users = await collection("users").find(null, "age=desc", 0, 0);
 
 // or with FindOptions
-let users = collection("User").find({
+let users = await collection("users").find({
   filter: "age=desc"
 });
 ```
 
 ```js
 // fetch 10 documents starting from offset = 2
-let users = collection("User").find(10, 2);
+let users = await collection("users").find(10, 2);
 
 // or with FindOptions
-let users = collection("User").find({
+let users = await collection("users").find({
   limit: 10,
   offset: 2
 });
@@ -309,87 +310,87 @@ Filter.in(); // filter from a list
 ```js
 // matches all documents where 'age' field has value as 30 and
 // 'name' field has value as John Doe
-collection("User").find(and(eq("age", 30), eq("name", "John Doe")));
+await collection("users").find(and(eq("age", 30), eq("name", "John Doe")));
 // with the statement syntax
-collection("User").find("age==30 && name==John Doe");
+await collection("users").find("age==30 && name==John Doe");
 ```
 
 **or()**
 ```js
 // matches all documents where 'age' field has value as 30 or
 // 'name' field has value as John Doe
-collection("User").find(or(eq("age", 30), eq("name", "John Doe")));
+await collection("users").find(or(eq("age", 30), eq("name", "John Doe")));
 // with the statement syntax
-collection("User").find("age==30 || name==John Doe");
+await collection("users").find("age==30 || name==John Doe");
 ```
 
 **not()**
 ```js
 // matches all documents where 'age' field has value not equals to 30
 // and name is not John Doe
-collection("User").find(not(and((eq("age", 30), eq("name", "John Doe"))));
+await collection("users").find(not(and((eq("age", 30), eq("name", "John Doe"))));
 // with the statement syntax
-collection("User").find("!(age==30 && name==John Doe)");
+await collection("users").find("!(age==30 && name==John Doe)");
 ```
 
 **eq()**
 ```js
 // matches all documents where 'age' field has value as 30
-collection("User").find(eq("age", 30));
+await collection("users").find(eq("age", 30));
 // with the statement syntax
-collection("User").find("age==30");
+await collection("users").find("age==30");
 ```
 
 **ne()**
 ```js
 // matches all documents where 'age' field has value not equals to 30
-collection("User").find(ne("age", 30));
+await collection("users").find(ne("age", 30));
 // with the statement syntax
-collection("User").find("age!=30");
+await collection("users").find("age!=30");
 ```
 
 **gt()**
 ```js
 // matches all documents where 'age' field has value greater than 30
-collection("User").find(gt("age", 30));
+await collection("users").find(gt("age", 30));
 // with the statement syntax
-collection("User").find("age>30");
+await collection("users").find("age>30");
 ```
 
 **gte()**
 ```js
 // matches all documents where 'age' field has value greater than or equal to 30
-collection("User").find(gte("age", 30));
+await collection("users").find(gte("age", 30));
 // with the statement syntax
-collection("User").find("age>=30");
+await collection("users").find("age>=30");
 ```
 
 **lt()**
 ```js
 // matches all documents where 'age' field has value less than 30
-collection("User").find(lt("age", 30));
+await collection("users").find(lt("age", 30));
 // with the statement syntax
-collection("User").find("age<30");
+await collection("users").find("age<30");
 ```
 
 **lte()**
 ```js
 // matches all documents where 'age' field has value lesser than or equal to 30
-collection("User").find(lte("age", 30));
+await collection("users").find(lte("age", 30));
 // with the statement syntax
-collection("User").find("age<=30");
+await collection("users").find("age<=30");
 ```
 
 **in()**
 ```js
 // matches all documents where 'age' field has value in [20, 30, 40]
-collection("User").find(Filter.in("age", 20, 30, 40));
+await collection("users").find(Filter.in("age", 20, 30, 40));
 
 List ages = List.of(20, 30, 40);
-collection("User").find(Filter.in("age", ages));
+await collection("users").find(Filter.in("age", ages));
 
 // with the statement syntax
-collection("User").find("age==[20, 30, 40]");
+await collection("users").find("age==[20, 30, 40]");
 ```
 
 
@@ -400,37 +401,37 @@ Same syntax as [SQL LIKE](https://www.w3schools.com/sql/sql_like.asp)
 
 ```js
 // matches all documents where 'address' field start with "a"
-collection("User").find(text("address", "a%"));
+await collection("users").find(text("address", "a%"));
 
 // with the statement syntax, applies to all text() examples
-collection("User").find("address=~a%");
+await collection("users").find("address=~a%");
 
 // matches all documents where 'address' field end with "a"
-collection("User").find(text("address", "%a"));
+await collection("users").find(text("address", "%a"));
 
 // matches all documents where 'address' field have "or" in any position
-collection("User").find(text("address", "%or%"));
+await collection("users").find(text("address", "%or%"));
 
 // matches all documents where 'address' field have "r" in the second position
-collection("User").find(text("address", "_r%"));
+await collection("users").find(text("address", "_r%"));
 
 // matches all documents where 'address' field start with "a" and are at least 2 characters in length
-collection("User").find(text("address", "a_%"));
+await collection("users").find(text("address", "a_%"));
 
 // matches all documents where 'address' field start with "a" and are at least 3 characters in length
-collection("User").find(text("address", "'a__%"));
+await collection("users").find(text("address", "'a__%"));
 
 // matches all documents where 'address' field start with "a" and ends with "o"
-collection("User").find(text("address", "a%o"));
+await collection("users").find(text("address", "a%o"));
 ```
 
 **regex()**
 Pass regex as a string.
 ```js
 // matches all documents where 'name' value starts with 'jim' or 'joe'.
-collection("User").find(regex("name", "^(jim|joe).*"));
+await collection("users").find(regex("name", "^(jim|joe).*"));
 // with the statement syntax
-collection("User").find("name~~^(jim|joe).*");
+await collection("users").find("name~~^(jim|joe).*");
 ```
 
 ## Filter nested objects
@@ -439,14 +440,14 @@ It's just as easy to filter nested objects in a collection. Each nested property
 
 ```js
 // matches all documents where a User's cat has an age of 7
-collection("User").find(eq("cat.age", 7));
+await collection("users").find(eq("cat.age", 7));
 // with the statement syntax
-collection("User").find("cat.age==7");
+await collection("users").find("cat.age==7");
 
 // matches all documents where a User's headphone has a brand of Bose
-collection("User").find(eq("accessory.headphones.brand", "Bose"));
+await collection("users").find(eq("accessory.headphones.brand", "Bose"));
 // with the statement syntax
-collection("User").find("accessory.headphones.brand==Bose");
+await collection("users").find("accessory.headphones.brand==Bose");
 ```
 
 ### CollectionConfig
