@@ -11,7 +11,7 @@ const java = require('java')
 // initCollection()
 // setTimeout(() => {
   
-  // test()
+  test()
   // test2()
 // }, 1000);
 // setTimeout(() => {
@@ -27,21 +27,21 @@ async function test() {
 
   console.log(collectionNames());
 
-  collection('user').watch(watchData => {
-    console.log('watchData:', watchData);
-  })
+  // collection('user').watch(watchData => {
+  //   console.log('watchData:', watchData);
+  // })
 
-  collection('user').watch('insert', watchData => {
-    console.log('[insert] watchData:', watchData);
-  })
+  // collection('user').watch('insert', watchData => {
+  //   console.log('[insert] watchData:', watchData);
+  // })
 
-  collection('user').watch('update', watchData => {
-    console.log('[update] watchData:', watchData);
-  })
+  // collection('user').watch('update', watchData => {
+  //   console.log('[update] watchData:', watchData);
+  // })
 
-  collection('user').watch('delete', watchData => {
-    console.log('[delete] watchData:', watchData);
-  })
+  // collection('user').watch('delete', watchData => {
+  //   console.log('[delete] watchData:', watchData);
+  // })
 
   let user = {
     _id: '3',
@@ -209,7 +209,17 @@ async function test() {
   // let names = ["Loke", "Elsa", "Theo"]
   // console.log(Filter.in("name", names));
 
+  let loke = {
+    _id: 'type1',
+    name: 'Loke',
+    email: 'loke@loke.com',
+    password: 'abc@23!-_?%ååÖ&a.pa$'
+  }
 
+  await collection('user').save(loke)
+
+  console.log(await await collection('user').findOne('email==loke@loke.com'));
+  console.log(await await collection('user').findOne('password==abc@23!-_?%ååÖ&a.pa$'));
 
 }
 

@@ -2,9 +2,11 @@
  * @author Johan Wirén
  */
 
+const NOSQLITE_VERSION = '1.0.3'
+
 const java = require('java')
 const { isObject } = require('./libs/utils')
-java.classpath.push(__dirname + '/nosqlite.jar')
+java.classpath.push(__dirname + '/nosqlite-' + NOSQLITE_VERSION + '.jar')
 
 const Collection = require('./libs/Collection')
 const Filter = require('./libs/Filter')
@@ -48,12 +50,11 @@ function initCollection(config = {}) {
     collections[coll] = new Collection(collection(coll), defaultConfig.parse, coll)
   }
 
-  // java.options.push('-Xrs')
+  // Java shutdown hook
   const ShutdownHookHelper = java.import('nosqlite.utilities.ShutdownHookHelper');
-
   ShutdownHookHelper.setShutdownHook(java.newProxy('java.lang.Runnable', {
-    run: function () {
-      console.log("\nJVM shutting down\n");
+    run: function() {
+      // console.log("\nJVM shutting down\n");
     }
   }));
 
