@@ -2,7 +2,7 @@
  * @author Johan Wirén
  */
 
-const java = require('java')
+const java = require('java-with-jre')
 const { nanoid } = require('nanoid')
 const { isObject } = require('./utils')
 

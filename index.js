@@ -4,7 +4,7 @@
 
 const NOSQLITE_VERSION = '1.0.3'
 
-const java = require('java')
+const java = require('java-with-jre')
 const { isObject } = require('./libs/utils')
 java.classpath.push(__dirname + '/nosqlite-' + NOSQLITE_VERSION + '.jar')
 

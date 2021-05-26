@@ -1,11 +1,10 @@
 {
   "name": "nosqlite3",
   "author": "Johan Wirén <johanwiren1@gmail.com>",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "description": "A lightweight embedded document database, ideal for small web applications.",
   "main": "./index.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [
     "sqlite",
     "nosql",
@@ -19,7 +18,7 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "java-with-jre": "^0.12.2",
+    "java-with-jre": "^0.12.3",
     "nanoid": "^3.1.22"
   },
   "repository": {
